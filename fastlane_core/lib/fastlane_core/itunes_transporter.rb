@@ -182,8 +182,9 @@ module FastlaneCore
     def file_upload_option(source)
       ext = File.extname(source).downcase
       is_asset_file_type = !File.directory?(source) && [".ipa", ".pkg", ".dmg", ".zip"].include?(ext)
+      UI.message("AssetFileType: #{is_asset_file_type}, #{ext}, #{source}")
 
-      if is_asset_file_type
+      if true || is_asset_file_type
         return "-assetFile #{source.shellescape}"
       else
         return "-f #{source.shellescape}"

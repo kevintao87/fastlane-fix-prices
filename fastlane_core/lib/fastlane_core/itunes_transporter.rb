@@ -686,6 +686,8 @@ module FastlaneCore
       use_shell_script ||= Helper.is_mac? && Helper.xcode_version.start_with?('6.')
       use_shell_script ||= Helper.windows?
       use_shell_script ||= Feature.enabled?('FASTLANE_ITUNES_TRANSPORTER_USE_SHELL_SCRIPT')
+      UI.message("Using iTMSTransporter shell script") if use_shell_script
+      use_shell_script = true
 
       if jwt.to_s.empty?
         @user = user
@@ -760,13 +762,17 @@ module FastlaneCore
       # otherwise it will use the .itmsp package
 
       force_itmsp = FastlaneCore::Env.truthy?("ITMSTRANSPORTER_FORCE_ITMS_PACKAGE_UPLOAD")
+      UI.message("Force itmsp: #{force_itmsp}")
+      force_itmsp = false
       can_use_asset_path = Helper.is_mac? && asset_path
 
       actual_dir = if can_use_asset_path && !force_itmsp
                      # The asset gets deleted upon completion so copying to a temp directory
                      # (with randomized filename, for multibyte-mixed filename upload fails)
                      new_file_name = "#{SecureRandom.uuid}#{File.extname(asset_path)}"
+                     UI.message("Using temp file name: #{new_file_name}")
                      tmp_asset_path = File.join(Dir.tmpdir, new_file_name)
+                     UI.message("Copying asset file to temp location: #{tmp_asset_path}")
                      FileUtils.cp(asset_path, tmp_asset_path)
                      tmp_asset_path
                    elsif package_path
@@ -789,7 +795,7 @@ module FastlaneCore
       api_key = api_key_with_p8_file_path(@api_key) if use_api_key
 
       command = @transporter_executor.build_upload_command(@user, @password, actual_dir, @provider_short_name, @jwt, platform, api_key)
-      UI.verbose(@transporter_executor.build_upload_command(@user, password_placeholder, actual_dir, @provider_short_name, jwt_placeholder, platform, api_key_placeholder))
+      UI.message(@transporter_executor.build_upload_command(@user, password_placeholder, actual_dir, @provider_short_name, jwt_placeholder, platform, api_key_placeholder))
 
       begin
         result = @transporter_executor.execute(command, ItunesTransporter.hide_transporter_output?)

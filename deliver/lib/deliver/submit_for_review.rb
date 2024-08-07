@@ -11,6 +11,7 @@ module Deliver
 
       platform = Spaceship::ConnectAPI::Platform.map(options[:platform])
       version = app.get_edit_app_store_version(platform: platform)
+      UI.success("Found editable version #{version.version_string} for #{platform}")
 
       unless version
         UI.user_error!("Cannot submit for review - could not find an editable version for '#{platform}'")
